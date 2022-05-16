@@ -1,6 +1,6 @@
 # Create your own dApp on Solana.
 
-![](https://i.imgur.com/7uNZkFx.png)
+![](https://i.imgur.com/oKgmjmK.png)
 
 このコースを始めるには、下記のステップを実行してください。
 
