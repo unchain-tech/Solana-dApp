@@ -13,6 +13,3 @@
 4. `npm run start` を実行してプロジェクトを開始します。
 
 5. コーディングを始めましょう。
-
-----
-Banner logo is created by modifying "ETH diamond" © [Ethereum Foundation](https://ethereum.org/en/assets/) (Licensed under CC BY 4.0).
