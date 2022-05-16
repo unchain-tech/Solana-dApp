@@ -1,6 +1,6 @@
 # Create your dApp.
 
-![](public/ETH-banner-blur.png)
+![](https://i.imgur.com/7uNZkFx.png)
 
 このコースを始めるには、下記のステップを実行してください。
 
