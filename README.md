@@ -1,4 +1,4 @@
-# Create your dApp.
+# Create your own dApp on Solana.
 
 ![](https://i.imgur.com/7uNZkFx.png)
 
