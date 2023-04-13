@@ -1,2 +1,6 @@
 node_modules
 .DS_STORE
+.anchor
+target
+test-ledger
+**/*.rs.bk
