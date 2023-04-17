@@ -1,15 +1,37 @@
-# Create your own dApp on Solana.
+## 💬 Solana-dApp(prototype)
 
-![](https://i.imgur.com/oKgmjmK.png)
+本レポジトリは Solana-dApp の完成版を示したものになります。
 
-このコースを始めるには、下記のステップを実行してください。
+以下の手順を実行することで Solana-dApp の挙動を確認できます。
 
-1. あなたの Github アカウントにこのレポジトリをフォークしましょう。
+### レポジトリのクローン
 
-2. クローンしたレポジトリをあなたのローカル環境にダウンロードしましょう。
+[こちら](https://github.com/unchain-tech/Solana-dApp.git)から Solana-dApp をクローンします。
 
-3. ターミナルを開き、ディレクトリのルートで `yarn install` を実行します。
+その後下のコマンドを実行することで必要なパッケージをインストールしましょう。
 
-4. `yarn start` を実行してプロジェクトを開始します。
+```
+yarn
+```
 
-5. コーディングを始めましょう。
+## コントラクトのテスト、デプロイ
+
+まずは[こちら](https://app.unchain.tech/learn/Solana-dApp/ja/3/1/)を参考に、devnet にデプロイする準備をしましょう。
+
+準備ができたら下のコマンドを実行させることで devnet にコントラクトをデプロイしましょう。
+
+```
+anchor deploy
+```
+
+これでコントラクトの準備は終了です。
+
+## フロントの立ち上げ
+
+`packages/client/src`に`idl.json`というディレクトリを作成して、その中に先ほど migrate した際に得た`packages/contract/target/idl/myepicproject.json`の内容をコピー　& ペーストしましょう。
+
+準備が整ったら、下のコマンドを実行してフロントを立ち上げ動作確認をしましょう。
+
+```
+yarn client start
+```

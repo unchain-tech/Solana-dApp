@@ -1,6 +1,7 @@
-node_modules
-.DS_STORE
-.anchor
-target
-test-ledger
-**/*.rs.bk
+**/yarn-error.log*
+
+# dependencies
+**/node_modules
+
+# misc
+**/.DS_Store
