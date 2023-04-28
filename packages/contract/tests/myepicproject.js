@@ -1,13 +1,14 @@
+const assert = require('assert');
 const anchor = require('@project-serum/anchor');
 const { SystemProgram } = anchor.web3;
 
-const main = async () => {
+describe('Solana-dApp-test', async () => {
   console.log('🚀 Starting test...');
-
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
   const program = anchor.workspace.Myepicproject;
+
   const baseAccount = anchor.web3.Keypair.generate();
   const tx = await program.rpc.startStuffOff({
     accounts: {
@@ -21,31 +22,28 @@ const main = async () => {
 
   let account = await program.account.baseAccount.fetch(baseAccount.publicKey);
   console.log('👀 GIF Count', account.totalGifs.toString());
+  assert.ok(typeof account.totalGifs === 'string');
 
-  // GIFリンクと送信ユーザーのアドレスを渡します。
-  await program.rpc.addGif('insert_a_gif_link_here', {
-    accounts: {
-      baseAccount: baseAccount.publicKey,
-      user: provider.wallet.publicKey,
-    },
+  const _baseAccount = baseAccount;
+  const _initialGifs = account.totalGifs;
+
+  it("It adds a GIF to the account's list", async () => {
+    const baseAccount = _baseAccount;
+    const initialGifs = _initialGifs;
+
+    // GIFリンクと送信ユーザーのアドレスを渡します。
+    await program.rpc.addGif('insert_a_gif_link_here', {
+      accounts: {
+        baseAccount: baseAccount.publicKey,
+        user: provider.wallet.publicKey,
+      },
+    });
+
+    // アカウントを呼び出します。
+    account = await program.account.baseAccount.fetch(baseAccount.publicKey);
+    assert.ok(account.totalGifs === initialGifs + 1);
+
+    // アカウントでgif_listにアクセスします。
+    console.log('👀 GIF List', account.gifList);
   });
-
-  // アカウントを呼び出します。
-  account = await program.account.baseAccount.fetch(baseAccount.publicKey);
-  console.log('👀 GIF Count', account.totalGifs.toString());
-
-  // アカウントでgif_listにアクセスします。
-  console.log('👀 GIF List', account.gifList);
-};
-
-const runMain = async () => {
-  try {
-    await main();
-    process.exitCode(0);
-  } catch (error) {
-    console.error(error);
-    process.exitCode(1);
-  }
-};
-
-runMain();
+});

@@ -39,6 +39,8 @@
     "prettier:check": "prettier --ignore-unknown --no-error-on-unmatched-pattern --ignore-path .prettierignore --check .",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "yarn workspace contract test"
+    "test": "yarn workspace contract test",
+    "anchor:deploy": "cd packages/contract && anchor deploy && cd ..",
+    "anchor:build": "cd packages/contract && anchor build && cd .."
   }
 }
