@@ -1,0 +1,183 @@
+name: Program tests
+
+on: pull_request
+
+env:
+  CACHE: true
+  NODE_VERSION: 17.0.1
+  SOLANA_CLI_VERSION: 1.14.17
+  ANCHOR_BINARY_NAME: anchor-binary-no-caching
+  CARGO_PROFILE: release
+  CARGO_CACHE_PATH: |
+    ~/.cargo/bin/
+    ~/.cargo/registry/index/
+    ~/.cargo/registry/cache/
+    ~/.cargo/git/db/
+    ./packages/contract/target/
+
+jobs:
+  setup-base:
+    name: Setup base
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: sudo apt-get update && sudo apt-get install -y pkg-config build-essential libudev-dev
+      - run: echo "ANCHOR_VERSION=$(cat ./VERSION)" >> $GITHUB_ENV
+
+  setup-node:
+    name: Setup node (v16)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'yarn'
+      - uses: actions/cache@v3
+        id: yarn-cache
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Install packages
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install --immutable
+
+  setup-solana:
+    name: Setup solana
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/cache@v3
+        name: Cache Solana Tool Suite
+        id: cache-solana
+        with:
+          path: |
+            ~/.cache/solana/
+            ~/.local/share/solana/
+          key: ${{ runner.os }}-solana-${{ env.SOLANA_CLI_VERSION }}
+      - name: install solana
+        if: steps.cache-solana.outputs.cache-hit != 'true'
+        run: sh -c "$(curl -sSfL https://release.solana.com/v${{ env.SOLANA_CLI_VERSION }}/install)"
+      - name: Add solana to path
+        run: echo "/home/runner/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+      - name: Generate keypair
+        run: solana-keygen new --outfile ~/.config/solana/id.json --force --no-bip39-passphrase
+      - name: Initialize solana config
+        run: solana config set --keypair ~/.config/solana/id.json && solana config set --url localhost
+
+  setup-anchor:
+    name: Setup anchor
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: setup-base
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        if: ${{ env.CACHE != 'false' }}
+        name: Cache Cargo registry + index
+        id: cache-anchor
+        with:
+          path: ${{ env.CARGO_CACHE_PATH }}
+          key: cargo-${{ runner.os }}-${{ env.CARGO_PROFILE }}-anchor-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install Cargo
+        if: steps.cache-anchor.outputs.cache-hit != 'true'
+        run: cargo install anchor-cli --locked --force
+        working-directory: packages/contract
+
+      - run: chmod +x ~/.cargo/bin/anchor
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.ANCHOR_BINARY_NAME }}
+          path: ~/.cargo/bin/anchor
+
+  basic-checks:
+    name: Lint & format
+    runs-on: ubuntu-latest
+    needs: setup-node
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      - name: lint
+        run: yarn lint
+      - name: format
+        run: |
+          yarn prettier:check
+          cd packages/contract && cargo fmt --check && cd ..
+
+  test-programs:
+    name: Test programs
+    needs: [basic-checks, setup-anchor, setup-solana]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Cache Cargo registry + index
+        id: cache-anchor
+        uses: actions/cache@v3
+        if: ${{ env.CACHE != 'false' }}
+        with:
+          path: ${{ env.CARGO_CACHE_PATH }}
+          key: cargo-${{ runner.os }}-${{ env.CARGO_PROFILE }}-anchor-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache Solana Tool Suite
+        id: cache-solana
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/solana/
+            ~/.local/share/solana/
+          key: ${{ runner.os }}-solana-${{ env.SOLANA_CLI_VERSION }}
+      - run: echo "/home/runner/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.ANCHOR_BINARY_NAME }}
+          path: ~/.cargo/bin/
+      - run: chmod +x ~/.cargo/bin/anchor
+
+      - name: Cache test target
+        id: cache-test-target
+        uses: actions/cache@v3
+        if: ${{ env.CACHE != 'false' }}
+        with:
+          path: packages/contract/target
+          key: cargo-${{ runner.os }}-${{ env.ANCHOR_VERSION }}-${{ env.SOLANA_CLI_VERSION }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Generate keypair
+        run: |
+          solana-keygen new --outfile fooKey.json --force --no-bip39-passphrase
+          solana config set --keypair fooKey.json && solana config set --url localhost
+
+      - name: Run local validator
+        working-directory: ./packages/contract
+        run: solana-test-validator -r --quiet &
+
+      - name: Build program
+        run: yarn anchor:build
+      - name: Reset program id
+        working-directory: ./packages/contract
+        run: |
+          echo "v=$(solana address -k target/deploy/myepicproject-keypair.json)" >> $GITHUB_ENV
+          solana config set --keypair target/deploy/myepicproject-keypair.json
+      - name: Rewrite program with new id
+        working-directory: ./packages/contract
+        run: sed -i -e "3s/^.*/declare_id!(\"$v\");/" programs/myepicproject/src/lib.rs && sed -i -e "5s/^.*/myepicproject = \"$v\"/" Anchor.toml
+      - name: Rebuild
+        run: yarn anchor:build
+
+      - name: Test program
+        run: yarn test
+
+      - name: Kill validator
+        run: kill $(lsof -t -i:8899)
