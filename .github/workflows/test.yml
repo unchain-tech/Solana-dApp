@@ -163,6 +163,9 @@ jobs:
         working-directory: ./packages/contract
         run: solana-test-validator -r --quiet &
 
+      - name: Delete wallet info
+        working-directory: ./packages/contract
+        run: rm target/deploy/myepicproject-keypair.json
       - name: Build program
         run: yarn anchor:build
       - name: Reset program id
