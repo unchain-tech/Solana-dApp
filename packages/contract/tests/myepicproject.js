@@ -12,15 +12,6 @@ describe('Solana-dApp-test', async () => {
 
     const baseAccount = anchor.web3.Keypair.generate();
 
-    console.log('📝 Your transaction signature', tx);
-
-    let account = await program.account.baseAccount.fetch(
-      baseAccount.publicKey,
-    );
-    console.log('👀 GIF Count', account.totalGifs.toString());
-    assert.ok(typeof account.totalGifs === 'string');
-    const _initialGifs = account.totalGifs;
-
     const tx = await program.rpc.startStuffOff({
       accounts: {
         baseAccount: baseAccount.publicKey,
@@ -29,7 +20,16 @@ describe('Solana-dApp-test', async () => {
       },
       signers: [baseAccount],
     });
-    const initialGifs = _initialGifs;
+
+    console.log('📝 Your transaction signature', tx);
+
+    let account = await program.account.baseAccount.fetch(
+      baseAccount.publicKey,
+    );
+    const _initialGifs = account.totalGifs;
+    const initialGifs = parseInt(_initialGifs);
+    console.log('👀 GIF Count', initialGifs.toString());
+    assert.ok(typeof initialGifs === 'number');
 
     // GIFリンクと送信ユーザーのアドレスを渡します。
     await program.rpc.addGif('insert_a_gif_link_here', {
@@ -41,7 +41,7 @@ describe('Solana-dApp-test', async () => {
 
     // アカウントを呼び出します。
     account = await program.account.baseAccount.fetch(baseAccount.publicKey);
-    assert.ok(account.totalGifs === initialGifs + 1);
+    assert.ok(parseInt(account.totalGifs) === initialGifs + 1);
 
     // アカウントでgif_listにアクセスします。
     console.log('👀 GIF List', account.gifList);
