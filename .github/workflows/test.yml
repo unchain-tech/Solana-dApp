@@ -178,7 +178,6 @@ jobs:
         working-directory: ./packages/contract
         run: |
           echo "v=$(solana address -k target/deploy/myepicproject-keypair.json)" >> $GITHUB_ENV
-          solana config set --keypair target/deploy/myepicproject-keypair.json
 
       - name: Rewrite program with new id
         working-directory: ./packages/contract

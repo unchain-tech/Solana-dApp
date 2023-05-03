@@ -3,13 +3,13 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-myepicproject = "BjRFA9h84SPZP1gE9d4am5MaJV5WQPWMAqhT1oQch2fP"
+myepicproject = "D4CTu5waqaY5tYbZpevMdYpzCyW5paovP41z3N9SwADt"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "http://127.0.0.1:8899"
 wallet = "fooKey.json"
 
 [scripts]
