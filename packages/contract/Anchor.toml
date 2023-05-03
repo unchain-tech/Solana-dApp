@@ -3,14 +3,14 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-myepicproject = "7ddmBbZfTMKwL7i4HwDBRifrrftxN5YFj5CmmzoXdATw"
+myepicproject = "D4CTu5waqaY5tYbZpevMdYpzCyW5paovP41z3N9SwADt"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
-wallet = "target/deploy/myepicproject-keypair.json"
+cluster = "http://127.0.0.1:8899"
+wallet = "fooKey.json"
 
 [scripts]
 test = "yarn run mocha -t 1000000 tests/"
