@@ -154,27 +154,38 @@ jobs:
           path: packages/contract/target
           key: cargo-${{ runner.os }}-${{ env.ANCHOR_VERSION }}-${{ env.SOLANA_CLI_VERSION }}-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Generate keypair
+      - name: Generate keypair for wallet
         run: |
           solana-keygen new --outfile fooKey.json --force --no-bip39-passphrase
           solana config set --keypair fooKey.json && solana config set --url localhost
+
+      - name: Generate keypair for program ID
+        run: |
+          solana-keygen new -o target/deploy/myepicproject-keypair.json --force --no-bip39-passphrase
 
       - name: Run local validator
         working-directory: ./packages/contract
         run: solana-test-validator -r --quiet &
 
-      - name: Build program
-        run: yarn anchor:build
+      - name: Request token
+        working-directory: ./packages/contract
+        run: solana airdrop 6
+
+      - name: Build and deploy program
+        run: yarn anchor:build &&  yarn anchor:deploy
+
       - name: Reset program id
         working-directory: ./packages/contract
         run: |
           echo "v=$(solana address -k target/deploy/myepicproject-keypair.json)" >> $GITHUB_ENV
           solana config set --keypair target/deploy/myepicproject-keypair.json
+
       - name: Rewrite program with new id
         working-directory: ./packages/contract
-        run: sed -i -e "3s/^.*/declare_id!(\"$v\");/" programs/myepicproject/src/lib.rs && sed -i -e "5s/^.*/myepicproject = \"$v\"/" Anchor.toml
-      - name: Rebuild
-        run: yarn anchor:build
+        run: sed -i -e "3s/^.*/declare_id!(\"$v\");/" programs/myepicproject/src/lib.rs && sed -i -e "6s/^.*/myepicproject = \"$v\"/" Anchor.toml
+
+      - name: Rebuild and Redeploy program
+        run: yarn anchor:build &&  yarn anchor:deploy
 
       - name: Test program
         run: yarn test
