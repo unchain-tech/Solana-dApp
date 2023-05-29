@@ -1,17 +1,21 @@
 {
-    "name": "solana-dapp",
-    "version": "1.0.0",
-    "description": "Create GIF collection dapp",
-    "private": true,
-    "workspaces": {
-      "packages": [
-        "packages/*"
-      ]
-    },
-    "scripts": {
-      "contract": "yarn workspace contract",
-      "client": "yarn workspace client",
-      "test": "yarn workspace contract test"
-    }
+  "name": "solana-dapp",
+  "version": "1.0.0",
+  "description": "Create GIF collection dapp",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "scripts": {
+    "contract": "yarn workspace contract",
+    "client": "yarn workspace client",
+    "test": "yarn workspace contract test",
+    "prettier": "prettier --ignore-unknown --no-error-on-unmatched-pattern --ignore-path .prettierignore --write ."
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.0.0",
+    "prettier": "^2.8.3"
   }
-  
+}

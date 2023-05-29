@@ -1,5 +1,5 @@
-import twitterLogo from './assets/twitter-logo.svg';
 import './App.css';
+import twitterLogo from './assets/twitter-logo.svg';
 
 // 定数を宣言します。
 const TWITTER_HANDLE = 'あなたのTwitterハンドル';
@@ -11,9 +11,7 @@ const App = () => {
       <div className="container">
         <div className="header-container">
           <p className="header">🖼 GIF Portal</p>
-          <p className="sub-text">
-            View your GIF collection ✨
-          </p>
+          <p className="sub-text">View your GIF collection ✨</p>
         </div>
         <div className="footer-container">
           <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
