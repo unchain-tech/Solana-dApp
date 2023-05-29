@@ -5,7 +5,10 @@
     "scripts": {
         "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
         "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
-        "test": "anchor test"
+        "test": "anchor test",
+        "build": "anchor build",
+        "deploy": "anchor deploy",
+        "run:test": "anchor run test"
     },
     "dependencies": {
         "@project-serum/anchor": "^0.26.0",
