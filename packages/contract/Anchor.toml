@@ -2,15 +2,14 @@
 seeds = false
 skip-lint = false
 [programs.localnet]
-solana_d_app = "SomeHashMpGXkYsWTK6W2BkgFidsLeZ7F476zPEfcYn"
+myepicproject = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 
 [registry]
-url = "https://api.apr.dev"
+url = "[https://api.apr.dev](https://api.apr.dev/)"
 
 [provider]
 cluster = "Localnet"
 wallet = "/Users/{YOUR_USERNAME}/.config/solana/id.json" # YOUR_USERNAMEは自分のPCのユーザー名に置き換えてください
-
 
 [scripts]
 test = "yarn run mocha -t 1000000 tests/"
