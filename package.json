@@ -1,10 +1,8 @@
 {
   "name": "monorepo-template",
   "version": "1.0.0",
-  "description": "\"template for monorepo project\"",
-  "main": "\"\"",
-  "author": "Tonny",
-  "license": "UNLICENSED",
+  "description": "Solana monorepo boilerplate",
+  "license": "MIT",
   "private": true,
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.0.0",
