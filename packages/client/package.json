@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@project-serum/anchor": "^0.26.0",
+    "@coral-xyz/anchor": "^0.31.0",
     "@solana/web3.js": "^1.77.2",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",

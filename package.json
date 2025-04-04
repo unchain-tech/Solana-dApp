@@ -1,6 +1,6 @@
 {
   "name": "solana-dapp",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Create GIF collection dapp",
   "private": true,
   "workspaces": {
@@ -11,11 +11,10 @@
   "scripts": {
     "contract": "yarn workspace contract",
     "client": "yarn workspace client",
+    "client:dev": "yarn workspace client dev",
     "test": "yarn workspace contract test",
-    "prettier": "prettier --ignore-unknown --no-error-on-unmatched-pattern --ignore-path .prettierignore --write ."
+    "anchor:deploy": "cd packages/contract && anchor deploy && cd ..",
+    "anchor:build": "cd packages/contract && anchor build && cd .."
   },
-  "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.0.0",
-    "prettier": "^2.8.3"
-  }
+  "devDependencies": {}
 }
