@@ -4,8 +4,8 @@ on: pull_request
 
 env:
   CACHE: true
-  NODE_VERSION: 17.0.1
-  SOLANA_CLI_VERSION: 1.14.17
+  NODE_VERSION: 23.7.0
+  SOLANA_CLI_VERSION: 2.2.6
   ANCHOR_BINARY_NAME: anchor-binary-no-caching
   CARGO_PROFILE: release
   CARGO_CACHE_PATH: |
@@ -25,16 +25,16 @@ jobs:
       - run: echo "ANCHOR_VERSION=$(cat ./VERSION)" >> $GITHUB_ENV
 
   setup-node:
-    name: Setup node (v16)
+    name: Setup node (v23)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 23.x
           cache: 'yarn'
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         id: yarn-cache
         with:
           path: '**/node_modules'
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         name: Cache Solana Tool Suite
         id: cache-solana
         with:
@@ -58,13 +58,15 @@ jobs:
           key: ${{ runner.os }}-solana-${{ env.SOLANA_CLI_VERSION }}
       - name: install solana
         if: steps.cache-solana.outputs.cache-hit != 'true'
-        run: sh -c "$(curl -sSfL https://release.solana.com/v${{ env.SOLANA_CLI_VERSION }}/install)"
+        run: sh -c "$(curl -sSfL https://release.anza.xyz/v${{ env.SOLANA_CLI_VERSION }}/install)"
       - name: Add solana to path
         run: echo "/home/runner/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
       - name: Generate keypair
         run: solana-keygen new --outfile ~/.config/solana/id.json --force --no-bip39-passphrase
       - name: Initialize solana config
         run: solana config set --keypair ~/.config/solana/id.json && solana config set --url localhost
+      - name: Solana Version
+        run: solana --version
 
   setup-anchor:
     name: Setup anchor
@@ -72,8 +74,8 @@ jobs:
     timeout-minutes: 20
     needs: setup-base
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
         if: ${{ env.CACHE != 'false' }}
         name: Cache Cargo registry + index
         id: cache-anchor
@@ -81,13 +83,16 @@ jobs:
           path: ${{ env.CARGO_CACHE_PATH }}
           key: cargo-${{ runner.os }}-${{ env.CARGO_PROFILE }}-anchor-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Install Cargo
+      - name: Install Anchor CLI (AVM)
         if: steps.cache-anchor.outputs.cache-hit != 'true'
-        run: cargo install anchor-cli --locked --force
+        run: |
+          cargo install --git https://github.com/coral-xyz/anchor avm --force
+          avm install latest
+          avm use latest
         working-directory: packages/contract
 
       - run: chmod +x ~/.cargo/bin/anchor
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ANCHOR_BINARY_NAME }}
           path: ~/.cargo/bin/anchor
@@ -98,8 +103,8 @@ jobs:
     needs: setup-node
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
@@ -116,15 +121,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: Cache Cargo registry + index
         id: cache-anchor
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         if: ${{ env.CACHE != 'false' }}
         with:
           path: ${{ env.CARGO_CACHE_PATH }}
@@ -132,7 +137,7 @@ jobs:
 
       - name: Cache Solana Tool Suite
         id: cache-solana
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/solana/
@@ -140,15 +145,18 @@ jobs:
           key: ${{ runner.os }}-solana-${{ env.SOLANA_CLI_VERSION }}
       - run: echo "/home/runner/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: ${{ env.ANCHOR_BINARY_NAME }}
           path: ~/.cargo/bin/
-      - run: chmod +x ~/.cargo/bin/anchor
+      - run: |
+          avm install latest
+          avm use latest
+          chmod +x ~/.cargo/bin/anchor
 
       - name: Cache test target
         id: cache-test-target
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         if: ${{ env.CACHE != 'false' }}
         with:
           path: packages/contract/target
@@ -184,7 +192,7 @@ jobs:
         run: sed -i -e "3s/^.*/declare_id!(\"$v\");/" programs/myepicproject/src/lib.rs && sed -i -e "6s/^.*/myepicproject = \"$v\"/" Anchor.toml
 
       - name: Rebuild and Redeploy program
-        run: yarn anchor:build &&  yarn anchor:deploy
+        run: yarn anchor:build && yarn anchor:deploy
 
       - name: Test program
         run: yarn test
