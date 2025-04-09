@@ -1,6 +1,6 @@
 name: Program tests
 
-on: pull_request
+on: [push, workflow_dispatch]
 
 env:
   CACHE: true
@@ -199,3 +199,7 @@ jobs:
 
       - name: Kill validator
         run: kill $(lsof -t -i:8899)
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
