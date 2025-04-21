@@ -4,6 +4,9 @@ members = [
     "programs/*"
 ]
 
+[toolchain]
+anchor_version = "0.31.0"
+
 [profile.release]
 overflow-checks = true
 lto = "fat"
