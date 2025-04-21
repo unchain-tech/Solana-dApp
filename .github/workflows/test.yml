@@ -150,8 +150,8 @@ jobs:
           name: ${{ env.ANCHOR_BINARY_NAME }}
           path: ~/.cargo/bin/
       - run: |
-          avm install latest
-          avm use latest
+          avm install 0.31.0-0e5285aecdf410fa0779b7cd09a47f235882c156
+          avm use 0.31.0-0e5285aecdf410fa0779b7cd09a47f235882c156
           chmod +x ~/.cargo/bin/anchor
 
       - name: Cache test target
