@@ -87,8 +87,8 @@ jobs:
         if: steps.cache-anchor.outputs.cache-hit != 'true'
         run: |
           cargo install --git https://github.com/coral-xyz/anchor avm --force
-          avm install latest
-          avm use latest
+          avm install 0.31.0-0e5285aecdf410fa0779b7cd09a47f235882c156
+          avm use 0.31.0
         working-directory: packages/contract
 
       - run: chmod +x ~/.cargo/bin/anchor
