@@ -3,7 +3,7 @@ name: Program tests
 on: [push, workflow_dispatch]
 
 env:
-  CACHE: false
+  CACHE: true
   NODE_VERSION: 23.7.0
   SOLANA_CLI_VERSION: 2.2.6
   ANCHOR_BINARY_NAME: anchor-binary-no-caching
@@ -150,7 +150,6 @@ jobs:
           name: ${{ env.ANCHOR_BINARY_NAME }}
           path: ~/.cargo/bin/
       - run: |
-          cargo install --git https://github.com/coral-xyz/anchor avm --force
           avm install 0.31.0-0e5285aecdf410fa0779b7cd09a47f235882c156
           avm use 0.31.0-0e5285aecdf410fa0779b7cd09a47f235882c156
           chmod +x ~/.cargo/bin/anchor
